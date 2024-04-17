@@ -1,8 +1,9 @@
 # openspace
+
 ## 模拟实现最小的区块链原理
 源码：https://github.com/Sword20140414/openspace/blob/main/homeworks/day2_mini_blackchain.py
 运行结果：
-'''
+```
 Index: 0
 Timestamp: 1713316819.1805193
 Data: Genesis Block
@@ -26,4 +27,4 @@ Timestamp: 1713316820.1761823
 Data: Transaction Data 3
 Previous Hash: 0000349ca71d5f76f5a4cf38fc4297165815a5712c74cb681fea0a787761fdbe
 Hash: 0000e8209a6646a05ed527f5d6a047ed784351afd25eefb2a25edebec354ab78
-'''
+```
