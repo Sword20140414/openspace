@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.7.4;
+pragma solidity ^0.8.4;
 
 contract Bank {
     address public owner; // 合约的拥有者，即管理员地址
