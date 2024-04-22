@@ -11,27 +11,33 @@ contract Bank {
         owner = msg.sender;
     }
 
+    // 检查是否是管理员的装饰器
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can withdraw funds");
+        _;
+    }
+
     // 接收以太币存款的函数
-    receive() external virtual payable {
+    receive() external payable virtual{
         require(msg.value > 0, "Deposit amount must be greater than 0");
-        
         // 记录用户存款
         balances[msg.sender] += msg.value;
-        upTop3(msg.sender);
+        upTop3();
     }
 
     // 更新前 3 名的用户地址
-    function upTop3(address current) public {
+    function upTop3() public virtual {
         // 更新在存款排行前三
-        if (balances[current] >= balances[top3Users[0]]) {
+        // 目前有个问题，如果是前三名的用户继续存款，该用户有可能同时占前两名及以上
+        if (balances[msg.sender] >= balances[top3Users[0]]) {
             top3Users[2] = top3Users[1];
             top3Users[1] = top3Users[0];
-            top3Users[0] = current;
-        } else if (balances[current] >= balances[top3Users[1]]) {
+            top3Users[0] = msg.sender;
+        } else if (balances[msg.sender] >= balances[top3Users[1]]) {
             top3Users[2] = top3Users[1];
-            top3Users[1] = current;
-        } else if (balances[current] >= balances[top3Users[2]]) {
-            top3Users[2] = current;
+            top3Users[1] = msg.sender;
+        } else if (balances[msg.sender] >= balances[top3Users[2]]) {
+            top3Users[2] = msg.sender;
         }
     }
 
@@ -41,10 +47,8 @@ contract Bank {
     }
 
     // 提取资金的函数，仅管理员可调用
-    function withdraw(uint256 amount) external virtual {
-        require(msg.sender == owner, "Only owner can withdraw funds");
+    function withdraw(uint256 amount) external virtual onlyOwner {
         require(amount <= address(this).balance, "Insufficient balance");
-
         payable(owner).transfer(amount);
     }
 }
