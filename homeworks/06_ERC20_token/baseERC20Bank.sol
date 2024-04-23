@@ -4,30 +4,22 @@ pragma solidity ^0.8.0;
 import "./BaseERC20.sol";
 
 contract TokenBank {
-    BaseERC20 public token; // 存储的代币合约地址
-    mapping(address => uint256) public balances; // 记录每个地址存入的代币数量
+    // 代币合约地址 => 用户地址 => 存款数量
+    mapping(address => mapping(address => uint256)) public userTokenBalances;
 
-    event Deposit(address indexed from, uint256 value); // 存款事件
-    event Withdrawal(address indexed to, uint256 value); // 取款事件
-
-    constructor(address _tokenAddress) {
-        token = BaseERC20(_tokenAddress); // 初始化代币合约地址
+    /** 将代币存入 TokenBank */
+    function deposit(address token, uint256 amount) public {
+        BaseERC20 erc20 = BaseERC20(token); // 实例化代币合约
+        erc20.transferFrom(msg.sender, address(this), amount); // 将代币从用户地址转移到 TokenBank
+        userTokenBalances[token][msg.sender] += amount; // 更新用户的存款数量
     }
 
-    // 存款函数
-    function deposit(uint256 _amount) external {
-        require(_amount > 0, "Deposit amount must be greater than 0");
-        require(token.transferFrom(msg.sender, address(this), _amount), "Transfer failed"); // 从发送者转入代币到 TokenBank
-        balances[msg.sender] += _amount; // 更新存款地址的余额
-        emit Deposit(msg.sender, _amount); // 触发存款事件
-    }
-
-    // 取款函数
-    function withdraw(uint256 _amount) external {
-        require(_amount > 0, "Withdrawal amount must be greater than 0");
-        require(balances[msg.sender] >= _amount, "Insufficient balance"); // 确保账户余额足够
-        require(token.transfer(msg.sender, _amount), "Transfer failed"); // 从 TokenBank 转出代币到发送者
-        balances[msg.sender] -= _amount; // 更新存款地址的余额
-        emit Withdrawal(msg.sender, _amount); // 触发取款事件
+    /** 从 TokenBank 取出代币 */
+    function withdraw(address token, uint256 amount) public {
+        uint256 balance = userTokenBalances[token][msg.sender]; // 获取用户的存款数量
+        require(balance >= amount, "Insufficient balance"); // 确保用户的存款足够
+        BaseERC20 erc20 = BaseERC20(token); // 实例化代币合约
+        erc20.transfer(msg.sender, amount); // 将代币从 TokenBank 转移到用户地址
+        userTokenBalances[token][msg.sender] -= amount; // 更新用户的存款数量
     }
 }
