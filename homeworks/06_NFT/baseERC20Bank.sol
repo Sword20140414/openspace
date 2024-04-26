@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./BaseERC20.sol";
 
 contract TokenBank {
-    // 用户地址 => 存款数量
+    // 代币合约地址 => 用户地址 => 存款数量
     mapping(address => uint256) public userTokenBalances;
     BaseERC20 erc20;
 
