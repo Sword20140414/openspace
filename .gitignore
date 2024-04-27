@@ -3,3 +3,5 @@ venv/
 .states/
 *artifacts/
 .deps/
+*.gitmodules/
+node_modules/
