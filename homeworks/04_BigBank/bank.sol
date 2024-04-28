@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
 
+interface IBank {
+    function withdraw() external;
+}
+
 contract Bank {
     address public owner; // 合约的拥有者，即管理员地址
     mapping(address => uint256) public balances;
@@ -17,12 +21,17 @@ contract Bank {
         _;
     }
 
-    // 接收以太币存款的函数
-    receive() external payable virtual{
+    // 记录转账，更新存款前三的用户
+    function deposit() public payable virtual {
         require(msg.value > 0, "Deposit amount must be greater than 0");
         // 记录用户存款
         balances[msg.sender] += msg.value;
         upTop3();
+    }
+
+
+    receive() external payable virtual{
+        deposit();
     }
 
     // 更新前 3 名的用户地址

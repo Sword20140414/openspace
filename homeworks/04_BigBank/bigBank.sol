@@ -3,15 +3,21 @@ pragma solidity ^0.8.4;
 
 import "./bank.sol";
 
-// 定义取款接口
-interface MyWithDraw {
-    function withdraw(uint amount) external;
-}
+/*
+编写一个 BigBank 合约， 它继承自该挑战 的 Bank 合约，并实现功能：
+
+要求存款金额 >0.001 ether（用modifier权限控制）
+BigBank 合约支持转移管理员
+同时编写一个 Ownable 合约，把 BigBank 的管理员转移给Ownable 合约， 实现只有Ownable 可以调用 BigBank 的 withdraw().
+编写 withdraw() 方法，仅管理员可以通过该方法提取资金。
+用数组记录存款金额的前 3 名用户
+*/
+
 
 contract BigBank is Bank{
-    // 检查金额是否大于0.001ETH
+    // 要求存款金额 >0.001 ether（用modifier权限控制）
     modifier checkAmount() {
-        require(msg.value > 1000 wei, "Must to more than 0.001ETH");
+        require(msg.value > 0.001 ether, "Must to more than 0.001ETH");
         _;
     }
 
@@ -20,13 +26,30 @@ contract BigBank is Bank{
         require(msg.value > 0, "Deposit amount must be greater than 0");
     }
 
-    // 转移管理员
+    // BigBank 合约支持转移管理员
     function setOwner (address newOwner) public onlyOwner {
         owner = newOwner;
-    }    
-
-    // 提取资金的函数，只有 Ownable 合约的所有者可以调用
-    function withdraw(uint256 amount) external view override onlyOwner {
-        require(amount <= address(this).balance, "Insufficient balance"); // 确保合约拥有足够的资金
     }
+
+    function deposit() public payable override checkAmount() {
+        super.deposit();
+    }    
+}
+
+
+contract Ownable {
+    address owner;
+
+    constructor() {
+        // 同时编写一个 Ownable 合约，把 BigBank 的管理员转移给Ownable 合约
+        owner = msg.sender;
+    }
+
+    function withdraw(address bankAddress) public {
+        // 编写 withdraw() 方法，仅管理员可以通过该方法提取资金。
+        require(msg.sender == owner, "Only owner can withdraw funds");
+        IBank(bankAddress).withdraw();
+    }
+
+    receive() external payable {}
 }
